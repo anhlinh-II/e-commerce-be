@@ -2,7 +2,9 @@ package com.vn.ecommerce.multivendor.controller;
 
 import com.vn.ecommerce.multivendor.domain.USER_ROLE;
 import com.vn.ecommerce.multivendor.modal.User;
+import com.vn.ecommerce.multivendor.modal.VerificationCode;
 import com.vn.ecommerce.multivendor.repository.UserRepository;
+import com.vn.ecommerce.multivendor.response.ApiResponse;
 import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.response.SignupRequest;
 import com.vn.ecommerce.multivendor.service.AuthService;
@@ -22,7 +24,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody SignupRequest req) {
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody SignupRequest req) throws Exception {
 
         String jwt = authService.createUser(req);
 
@@ -30,6 +32,18 @@ public class AuthController {
         response.setJwt(jwt);
         response.setMessage("Register successfully!");
         response.setRole(USER_ROLE.ROLE_CUSTOMER);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/send/login-signup-otp")
+    public ResponseEntity<ApiResponse> sendOtpHandler(@RequestBody VerificationCode req) throws Exception {
+
+        authService.sendLoginOtp(req.getEmail());
+
+        ApiResponse response = new ApiResponse();
+
+        response.setMessage("OTP sent successfully!");
 
         return ResponseEntity.ok(response);
     }
