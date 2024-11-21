@@ -3,25 +3,32 @@ package com.vn.ecommerce.multivendor.service.impl;
 import com.vn.ecommerce.multivendor.config.JwtProvider;
 import com.vn.ecommerce.multivendor.domain.USER_ROLE;
 import com.vn.ecommerce.multivendor.modal.Cart;
+import com.vn.ecommerce.multivendor.modal.Seller;
 import com.vn.ecommerce.multivendor.modal.User;
 import com.vn.ecommerce.multivendor.modal.VerificationCode;
 import com.vn.ecommerce.multivendor.repository.CartRepository;
+import com.vn.ecommerce.multivendor.repository.SellerRepository;
 import com.vn.ecommerce.multivendor.repository.UserRepository;
 import com.vn.ecommerce.multivendor.repository.VerificationCodeRepository;
+import com.vn.ecommerce.multivendor.request.LoginRequest;
+import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.response.SignupRequest;
 import com.vn.ecommerce.multivendor.service.AuthService;
 import com.vn.ecommerce.multivendor.service.EmailService;
 import com.vn.ecommerce.multivendor.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -34,21 +41,32 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProvider jwtProvider;
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
+    private final CustomUserServiceImpl customUserService;
+    private final SellerRepository sellerRepository;
 
     @Override
-    public void sendLoginOtp(String email) throws Exception {
+    public void sendLoginOtp(String email, USER_ROLE role) throws Exception {
         String SIGNING_PREFIX = "signing_";
+
         if (email.startsWith(SIGNING_PREFIX)) {
             email = email.substring(SIGNING_PREFIX.length());
 
-            User user = userRepository.findByEmail(email);
-            if (user == null) {
-                throw new Exception("User not exist with provided email");
+            if (role.equals(USER_ROLE.ROLE_SELLER)) {
+                Seller seller = sellerRepository.findByEmail(email);
+                if (seller == null) {
+                    throw new Exception("Seller not found");
+                }
+
+            } else {
+                User user = userRepository.findByEmail(email);
+                if (user == null) {
+                    throw new Exception("User not exist with provided email");
+                }
             }
         }
 
         VerificationCode isExist = verificationCodeRepository.findByEmail(email);
-        if (isExist!=null) {
+        if (isExist != null) {
             verificationCodeRepository.delete(isExist);
         }
 
@@ -98,5 +116,46 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return jwtProvider.generateToken(authentication);
+    }
+
+    @Override
+    public AuthResponse signing(LoginRequest req) {
+        String username = req.getEmail();
+        String otp = req.getOtp();
+
+        Authentication authentication = authenticate(username, otp);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtProvider.generateToken(authentication);
+
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setJwt(token);
+        authResponse.setMessage("Login success");
+
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        String roleName = authorities.isEmpty() ? null : authorities.iterator().next().getAuthority();
+
+        authResponse.setRole(USER_ROLE.valueOf(roleName));
+        return authResponse;
+    }
+
+    private Authentication authenticate(String username, String otp) {
+        UserDetails userDetails = customUserService.loadUserByUsername(username);
+
+        if (userDetails == null) {
+            throw new BadCredentialsException("invalid username or password");
+        }
+
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(username);
+
+        if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
+            throw new BadCredentialsException("Wrong otp!");
+        }
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
     }
 }

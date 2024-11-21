@@ -4,6 +4,8 @@ import com.vn.ecommerce.multivendor.domain.USER_ROLE;
 import com.vn.ecommerce.multivendor.modal.User;
 import com.vn.ecommerce.multivendor.modal.VerificationCode;
 import com.vn.ecommerce.multivendor.repository.UserRepository;
+import com.vn.ecommerce.multivendor.request.LoginOtpRequest;
+import com.vn.ecommerce.multivendor.request.LoginRequest;
 import com.vn.ecommerce.multivendor.response.ApiResponse;
 import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.response.SignupRequest;
@@ -37,14 +39,22 @@ public class AuthController {
     }
 
     @PostMapping("/send/login-signup-otp")
-    public ResponseEntity<ApiResponse> sendOtpHandler(@RequestBody VerificationCode req) throws Exception {
+    public ResponseEntity<ApiResponse> sendOtpHandler(@RequestBody LoginOtpRequest req) throws Exception {
 
-        authService.sendLoginOtp(req.getEmail());
+        authService.sendLoginOtp(req.getEmail(), req.getRole());
 
         ApiResponse response = new ApiResponse();
 
         response.setMessage("OTP sent successfully!");
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/signing")
+    public ResponseEntity<AuthResponse> loginHandler(@RequestBody LoginRequest req) throws Exception {
+
+        AuthResponse authResponse = authService.signing(req);
+
+        return ResponseEntity.ok(authResponse);
     }
 }
