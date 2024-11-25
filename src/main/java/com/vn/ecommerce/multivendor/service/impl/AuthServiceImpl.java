@@ -49,8 +49,6 @@ public class AuthServiceImpl implements AuthService {
         String SIGNING_PREFIX = "signing_";
 
         if (email.startsWith(SIGNING_PREFIX)) {
-            email = email.substring(SIGNING_PREFIX.length());
-
             if (role.equals(USER_ROLE.ROLE_SELLER)) {
                 Seller seller = sellerRepository.findByEmail(email);
                 if (seller == null) {
@@ -142,6 +140,11 @@ public class AuthServiceImpl implements AuthService {
 
     private Authentication authenticate(String username, String otp) {
         UserDetails userDetails = customUserService.loadUserByUsername(username);
+
+        String SELLER_PREFIX = "seller_";
+        if (username.startsWith(SELLER_PREFIX)) {
+            username = username.substring(SELLER_PREFIX.length());
+        }
 
         if (userDetails == null) {
             throw new BadCredentialsException("invalid username or password");

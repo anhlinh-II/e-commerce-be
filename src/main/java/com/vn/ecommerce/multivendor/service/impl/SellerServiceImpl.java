@@ -3,6 +3,7 @@ package com.vn.ecommerce.multivendor.service.impl;
 import com.vn.ecommerce.multivendor.config.JwtProvider;
 import com.vn.ecommerce.multivendor.domain.AccountStatus;
 import com.vn.ecommerce.multivendor.domain.USER_ROLE;
+import com.vn.ecommerce.multivendor.exception.SellerException;
 import com.vn.ecommerce.multivendor.modal.Address;
 import com.vn.ecommerce.multivendor.modal.Seller;
 import com.vn.ecommerce.multivendor.repository.AddressRepository;
@@ -24,16 +25,16 @@ public class SellerServiceImpl implements SellerService {
     private final AddressRepository addressRepository;
 
     @Override
-    public Seller getSellerProfile(String jwt) throws Exception {
+    public Seller getSellerProfile(String jwt) throws SellerException {
         String email = jwtProvider.getEmailFromJwtToken(jwt);
         return this.getSellerByEmail(email);
     }
 
     @Override
-    public Seller createSeller(Seller seller) throws Exception {
+    public Seller createSeller(Seller seller) throws SellerException {
         Seller sellerExist = sellerRepository.findByEmail(seller.getEmail());
         if (sellerExist != null) {
-            throw new Exception("Seller already existed, use different email!");
+            throw new SellerException("Seller already existed, use different email!");
         }
 
         Address savedAddress = addressRepository.save(seller.getPickupAddress());
@@ -53,16 +54,16 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller getSellerById(Long id) throws Exception {
+    public Seller getSellerById(Long id) throws SellerException {
         return sellerRepository.findById(id)
-                .orElseThrow(() -> new Exception("seller not found with id - " + id));
+                .orElseThrow(() -> new SellerException("seller not found with id - " + id));
     }
 
     @Override
-    public Seller getSellerByEmail(String email) throws Exception {
+    public Seller getSellerByEmail(String email) throws SellerException {
         Seller seller = sellerRepository.findByEmail(email);
         if (seller == null) {
-            throw new Exception("Seller not found");
+            throw new SellerException("Seller not found");
         }
         return seller;
     }
