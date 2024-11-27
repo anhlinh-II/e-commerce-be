@@ -27,7 +27,7 @@ import com.vn.ecommerce.multivendor.service.SellerService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/sellers/products")
+@RequestMapping("/sellers/products")
 @RequiredArgsConstructor
 public class SellerProductController {
 
@@ -49,8 +49,8 @@ public class SellerProductController {
                @RequestHeader("Authorization") String jwt) throws SellerException {
           Seller seller = sellerService.getSellerProfile(jwt);
           Product product = productService.createProduct(request, seller);
-
-          return new ResponseEntity<>(product, HttpStatus.OK);
+          System.out.println("jwt: " + jwt);
+          return new ResponseEntity<>(product, HttpStatus.CREATED);
      }
 
      @DeleteMapping("/{productId}")
