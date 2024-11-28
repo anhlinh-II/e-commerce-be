@@ -3,9 +3,7 @@ package com.vn.ecommerce.multivendor.controller;
 import com.vn.ecommerce.multivendor.domain.PaymentMethod;
 import com.vn.ecommerce.multivendor.modal.*;
 import com.vn.ecommerce.multivendor.response.PaymentLinkResponse;
-import com.vn.ecommerce.multivendor.service.CartService;
-import com.vn.ecommerce.multivendor.service.OrderService;
-import com.vn.ecommerce.multivendor.service.UserService;
+import com.vn.ecommerce.multivendor.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +20,15 @@ public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
     private final CartService cartService;
-//    private final PaymentService
+    private final SellerService sellerService;
+    private final SellerReportService sellerReportService;
 
     @PostMapping
     public ResponseEntity<PaymentLinkResponse> createOrderHandler(
             @RequestBody Address shippingAddress,
             @RequestParam PaymentMethod paymentMethod,
             @RequestHeader("Authorization") String jwt
-            ) throws Exception {
+    ) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
         Cart cart = cartService.findUserCart(user);
         Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
@@ -73,7 +72,13 @@ public class OrderController {
         User user = userService.findUserByJwtToken(jwt);
         Order order = orderService.cancelOrder(orderId, user);
 
-        // seller report
+        Seller seller = sellerService.getSellerById(order.getSellerId());
+        SellerReport report = sellerReportService.getSellerReport(seller);
+
+        report.setCanceledOrders(report.getCanceledOrders() + 1);
+        report.setTotalRefunds(report.getTotalRefunds() + order.getTotalSellingPrice());
+
+        sellerReportService.updateSellerReport(report);
 
         return ResponseEntity.ok(order);
     }

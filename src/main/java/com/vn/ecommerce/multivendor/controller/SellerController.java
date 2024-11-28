@@ -4,12 +4,14 @@ import com.vn.ecommerce.multivendor.config.JwtProvider;
 import com.vn.ecommerce.multivendor.domain.AccountStatus;
 import com.vn.ecommerce.multivendor.exception.SellerException;
 import com.vn.ecommerce.multivendor.modal.Seller;
+import com.vn.ecommerce.multivendor.modal.SellerReport;
 import com.vn.ecommerce.multivendor.modal.VerificationCode;
 import com.vn.ecommerce.multivendor.repository.VerificationCodeRepository;
 import com.vn.ecommerce.multivendor.request.LoginRequest;
 import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.service.AuthService;
 import com.vn.ecommerce.multivendor.service.EmailService;
+import com.vn.ecommerce.multivendor.service.SellerReportService;
 import com.vn.ecommerce.multivendor.service.SellerService;
 import com.vn.ecommerce.multivendor.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SellerController {
     private final AuthService authService;
     private final EmailService emailService;
     private final JwtProvider jwtProvider;
+    private final SellerReportService sellerReportService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(@RequestBody LoginRequest req) {
@@ -86,6 +89,14 @@ public class SellerController {
         Seller seller = sellerService.getSellerProfile(jwt);
 
         return new ResponseEntity<>(seller, HttpStatus.OK);
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<SellerReport> getSellerReport(@RequestHeader("Authorization") String jwt) throws SellerException {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        SellerReport report =sellerReportService.getSellerReport(seller);
+
+        return ResponseEntity.ok(report);
     }
 
     @GetMapping
