@@ -2,6 +2,7 @@ package com.vn.ecommerce.multivendor.controller;
 
 import com.vn.ecommerce.multivendor.domain.PaymentMethod;
 import com.vn.ecommerce.multivendor.modal.*;
+import com.vn.ecommerce.multivendor.response.OrderResponse;
 import com.vn.ecommerce.multivendor.response.PaymentLinkResponse;
 import com.vn.ecommerce.multivendor.service.*;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +25,22 @@ public class OrderController {
     private final SellerReportService sellerReportService;
 
     @PostMapping
-    public ResponseEntity<PaymentLinkResponse> createOrderHandler(
+    public ResponseEntity<OrderResponse> createOrderHandler(
             @RequestBody Address shippingAddress,
-            @RequestParam PaymentMethod paymentMethod,
             @RequestHeader("Authorization") String jwt
     ) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
         Cart cart = cartService.findUserCart(user);
         Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
 
-//        PaymentOrder paymentOrder = paymentService
+        Long totalMoney = orders.stream()
+                .mapToLong(Order::getTotalSellingPrice)
+                .sum();
 
-        PaymentLinkResponse res = new PaymentLinkResponse();
+
+        OrderResponse res = new OrderResponse();
+        res.setOrders(orders);
+        res.setTotalMoney(totalMoney);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 

@@ -14,9 +14,9 @@ import com.vn.ecommerce.multivendor.request.LoginRequest;
 import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.response.SignupRequest;
 import com.vn.ecommerce.multivendor.service.AuthService;
-import com.vn.ecommerce.multivendor.service.EmailService;
 import com.vn.ecommerce.multivendor.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +33,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -47,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendLoginOtp(String email, USER_ROLE role) throws Exception {
         String SIGNING_PREFIX = "signing_";
+
+        log.info("email: {}: ", email);
 
         if (email.startsWith(SIGNING_PREFIX)) {
             if (role.equals(USER_ROLE.ROLE_SELLER)) {
@@ -110,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(USER_ROLE.ROLE_CUSTOMER.toString()));
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(req.getEmail(), null);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(req.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return jwtProvider.generateToken(authentication);

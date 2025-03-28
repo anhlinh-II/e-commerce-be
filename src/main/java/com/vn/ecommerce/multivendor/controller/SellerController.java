@@ -10,7 +10,7 @@ import com.vn.ecommerce.multivendor.repository.VerificationCodeRepository;
 import com.vn.ecommerce.multivendor.request.LoginRequest;
 import com.vn.ecommerce.multivendor.response.AuthResponse;
 import com.vn.ecommerce.multivendor.service.AuthService;
-import com.vn.ecommerce.multivendor.service.EmailService;
+import com.vn.ecommerce.multivendor.service.impl.EmailService;
 import com.vn.ecommerce.multivendor.service.SellerReportService;
 import com.vn.ecommerce.multivendor.service.SellerService;
 import com.vn.ecommerce.multivendor.utils.OtpUtil;

@@ -4,7 +4,6 @@ import com.vn.ecommerce.multivendor.modal.Cart;
 import com.vn.ecommerce.multivendor.modal.CartItem;
 import com.vn.ecommerce.multivendor.modal.Product;
 import com.vn.ecommerce.multivendor.modal.User;
-import org.springframework.stereotype.Service;
 
 public interface CartService {
     public CartItem addCartItem(
@@ -15,4 +14,6 @@ public interface CartService {
     );
 
     public Cart findUserCart(User user);
+
+    public void clearCart(User user);
 }

@@ -1,8 +1,6 @@
 package com.vn.ecommerce.multivendor.controller;
 
 import com.vn.ecommerce.multivendor.domain.USER_ROLE;
-import com.vn.ecommerce.multivendor.modal.User;
-import com.vn.ecommerce.multivendor.modal.VerificationCode;
 import com.vn.ecommerce.multivendor.repository.UserRepository;
 import com.vn.ecommerce.multivendor.request.LoginOtpRequest;
 import com.vn.ecommerce.multivendor.request.LoginRequest;

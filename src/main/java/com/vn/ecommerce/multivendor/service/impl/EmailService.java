@@ -1,4 +1,4 @@
-package com.vn.ecommerce.multivendor.service;
+package com.vn.ecommerce.multivendor.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -24,9 +24,9 @@ public class EmailService {
             mimeMessageHelper.setText(text);
             mimeMessageHelper.setTo(userEmail);
             javaMailSender.send(mimeMessage);
+            System.out.println("code run here");
         } catch (MailException e) {
             throw new MailSendException("Failed to send email!");
-
         }
     }
 }

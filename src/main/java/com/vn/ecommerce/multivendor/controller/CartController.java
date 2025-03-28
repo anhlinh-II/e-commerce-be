@@ -78,4 +78,12 @@ public class CartController {
 
         return new ResponseEntity<>(updatedCartItem, HttpStatus.ACCEPTED);
     }
+
+    @DeleteMapping("/clear-cart")
+    public ResponseEntity<String> clearCart(@RequestHeader("Authorization") String jwt) throws Exception {
+        User user = userService.findUserByJwtToken(jwt);
+        cartService.clearCart(user);
+
+        return ResponseEntity.ok("Clear user cart successfully!");
+    }
 }

@@ -10,7 +10,6 @@ import com.vn.ecommerce.multivendor.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.rmi.server.ExportException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +47,7 @@ public class OrderServiceImpl implements OrderService {
             int totalOrderPrice = items.stream().mapToInt(
                     CartItem::getSellingPrice
             ).sum();
+            
             int totalItem = items.stream().mapToInt(CartItem::getQuantity).sum();
             Order createdOrder = new Order();
             createdOrder.setUser(user);

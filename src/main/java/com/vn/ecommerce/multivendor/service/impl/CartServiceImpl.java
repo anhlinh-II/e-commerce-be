@@ -6,6 +6,7 @@ import com.vn.ecommerce.multivendor.modal.Product;
 import com.vn.ecommerce.multivendor.modal.User;
 import com.vn.ecommerce.multivendor.repository.CartItemRepository;
 import com.vn.ecommerce.multivendor.repository.CartRepository;
+import com.vn.ecommerce.multivendor.service.CartItemService;
 import com.vn.ecommerce.multivendor.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final CartItemService cartItemService;
 
     @Override
     public CartItem addCartItem(User user, Product product, String size, int quantity) {
@@ -75,6 +77,11 @@ public class CartServiceImpl implements CartService {
         double discountPercentage = (discount / mrpPrice) * 100;
 
         return (int)discountPercentage;
+    }
+
+    public void clearCart(User user) {
+        Cart cart = cartRepository.findByUserId(user.getId());
+        cartItemRepository.deleteByCart(cart);
     }
 
 }
